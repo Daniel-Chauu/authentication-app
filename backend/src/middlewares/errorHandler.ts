@@ -2,6 +2,7 @@ import { ErrorRequestHandler, Response } from 'express'
 import { ZodError } from 'zod'
 import { ErrorCode } from '~/common/enums/error-code.enum'
 import { AppError } from '~/common/utils/AppError'
+import { clearAuthenticationCookies, REFRESH_PATH } from '~/common/utils/cookie'
 import logError from '~/common/utils/log-error'
 import { HTTP_STATUS } from '~/config/http.config'
 
@@ -25,6 +26,10 @@ export const errorHandler: ErrorRequestHandler = (
   next
 ): any => {
   logError(error, req)
+
+  if (req.path === REFRESH_PATH) {
+    clearAuthenticationCookies(res)
+  }
 
   if (error instanceof SyntaxError) {
     return res
