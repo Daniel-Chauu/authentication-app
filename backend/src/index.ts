@@ -9,6 +9,7 @@ import { errorHandler } from './middlewares/errorHandler'
 import asyncHandler from './middlewares/asyncHandler'
 import { BadRequestException } from './common/utils/catch-errors'
 import { ErrorCode } from './common/enums/error-code.enum'
+import authRoute from './modules/auth/auth.route'
 
 const app = express()
 const { BASE_PATH, PORT, NODE_ENV } = config
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cors({ origin: process.env.APP_ORIGIN, credentials: true }))
 app.use(cookieParser())
 
+app.use(`${BASE_PATH}/auth`, authRoute)
 app.use(errorHandler)
 
 connectDatabase()
