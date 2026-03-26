@@ -1,5 +1,12 @@
-import jwt from 'jsonwebtoken'
-import { TokenPayload } from '../interfaces/jwt.interface'
+import jwt, { JwtPayload } from 'jsonwebtoken'
+import {
+  AccessTokenPayload,
+  RefreshTokenPayload
+} from '../interfaces/jwt.interface'
+
+const defaults = {
+  audience: ['user']
+}
 
 const signToken = ({
   payload,
@@ -14,7 +21,7 @@ const signToken = ({
     jwt.sign(
       payload,
       secretKey,
-      { algorithm: 'HS256', ...options },
+      { algorithm: 'HS256', ...defaults, ...options },
       function (error, encoded) {
         if (error) {
           return rej(error)
@@ -24,7 +31,7 @@ const signToken = ({
     )
   })
 
-const verifyToken = ({
+const verifyToken = <T extends JwtPayload>({
   token,
   secretKey,
   options
@@ -33,14 +40,19 @@ const verifyToken = ({
   secretKey: string
   options?: jwt.VerifyOptions
 }) =>
-  new Promise<TokenPayload>((res, rej) => {
-    jwt.verify(token, secretKey, options, function (error, decoded) {
-      if (error) {
-        return rej(error)
-      }
+  new Promise<T>((res, rej) => {
+    jwt.verify(
+      token,
+      secretKey,
+      { audience: ['user'], ...options },
+      function (error, decoded) {
+        if (error) {
+          return rej(error)
+        }
 
-      res(decoded as TokenPayload)
-    })
+        res(decoded as T)
+      }
+    )
   })
 
 export { signToken, verifyToken }

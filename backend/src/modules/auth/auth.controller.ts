@@ -1,10 +1,20 @@
 import { Request, Response } from 'express'
 import { AuthService } from './auth.service'
-import { loginSchema, registerSchema } from '~/common/validators/auth.validator'
+import {
+  loginSchema,
+  registerSchema,
+  verifycationEmailSchema
+} from '~/common/validators/auth.validator'
 import { HTTP_STATUS } from '~/config/http.config'
 import { RegisterDto } from '~/common/interfaces/auth.interface'
 import wrapAsyncHandler from '~/middlewares/asyncHandler'
-import { setAuthenticationCookies } from '~/common/utils/cookie'
+import {
+  getAccessTokenCookieOptions,
+  getRefreshTokenCookieOptions,
+  setAuthenticationCookies
+} from '~/common/utils/cookie'
+import { UnauthorizedException } from '~/common/utils/catch-errors'
+import { ErrorCode } from '~/common/enums/error-code.enum'
 
 export class AuthController {
   private authService: AuthService
@@ -51,5 +61,45 @@ export class AuthController {
         message: 'User logged in successfully',
         data: response
       })
+  })
+
+  public refreshToken = wrapAsyncHandler(
+    async (req: Request, res: Response) => {
+      const refreshToken = req.cookies['refreshToken']
+      if (!refreshToken)
+        throw new UnauthorizedException(
+          'Missing refresh token',
+          ErrorCode.ACCESS_UNAUTHORIZED
+        )
+
+      const { accessToken, newRefreshToken } =
+        await this.authService.refreshToken(refreshToken)
+
+      if (newRefreshToken) {
+        res.cookie('refreshToken', refreshToken, getRefreshTokenCookieOptions())
+      }
+
+      res
+        .cookie('accessToken', accessToken, getAccessTokenCookieOptions())
+        .status(HTTP_STATUS.OK)
+        .json({
+          message: 'Refresh token successfully',
+          data: {
+            accessToken,
+            refreshToken: newRefreshToken
+          }
+        })
+    }
+  )
+
+  public verifyEmail = wrapAsyncHandler(async (req: Request, res: Response) => {
+    const { code } = verifycationEmailSchema.parse(req.body)
+
+    const response = await this.authService.verifyEmail(code)
+
+    res.status(HTTP_STATUS.OK).json({
+      message: 'Email verified  successfully',
+      data: response
+    })
   })
 }

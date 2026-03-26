@@ -7,7 +7,7 @@ interface UserPreferences {
   twoFactorSecret?: string
 }
 
-interface UserDocument extends Document {
+export interface UserDocument extends Document {
   name: string
   email: string
   password: string

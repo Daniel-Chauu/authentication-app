@@ -8,7 +8,7 @@ interface CookiePayload {
   refreshToken: string
 }
 
-export const REFRESH_PATH = `${config.BASE_PATH}/auth/refresh`
+export const REFRESH_PATH = `${config.BASE_PATH}/auth/refresh-token`
 
 const defaults: CookieOptions = {
   httpOnly: true,
@@ -16,7 +16,7 @@ const defaults: CookieOptions = {
   sameSite: config.NODE_ENV === 'production' ? 'strict' : 'lax'
 }
 
-const getAccessTokenCookieOptions = (): CookieOptions => {
+export const getAccessTokenCookieOptions = (): CookieOptions => {
   const expiresIn = config.JWT.EXPIRES_IN
   const expires = calculateExpirationDate(expiresIn)
 
@@ -26,7 +26,7 @@ const getAccessTokenCookieOptions = (): CookieOptions => {
     path: '/'
   }
 }
-const getRefreshTokenCookieOptions = (): CookieOptions => {
+export const getRefreshTokenCookieOptions = (): CookieOptions => {
   const expiresIn = config.JWT.REFRESH_EXPIRES_IN
   const expires = calculateExpirationDate(expiresIn)
 
@@ -43,9 +43,10 @@ export const setAuthenticationCookies = ({
   refreshToken
 }: CookiePayload): Response => {
   return res
-    .cookie('accessToken', accessToken, getAccessTokenCookieOptions())
     .cookie('refreshToken', refreshToken, getRefreshTokenCookieOptions())
+    .cookie('accessToken', accessToken, getAccessTokenCookieOptions())
 }
+
 export const clearAuthenticationCookies = (res: Response): Response => {
   return res
     .clearCookie('accessToken')
