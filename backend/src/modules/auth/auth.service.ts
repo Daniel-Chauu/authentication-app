@@ -19,6 +19,8 @@ import { config } from '~/config/app.config'
 import SessionModel from '~/database/models/session.model'
 import UserModel from '~/database/models/user.model'
 import VerificationCodeModel from '~/database/models/verification.model'
+import { sendEmail } from '~/mailers/mailer'
+import { verifyEmailTemplate } from '~/mailers/templates/template'
 
 export class AuthService {
   private generateRefreshToken(payload: { sessionId: Types.ObjectId }) {
@@ -72,13 +74,16 @@ export class AuthService {
       type: VerificationEnum.EMAIL_VERIFICATION,
       expiredAt: fortyFiveMinutesFromNow()
     })
-    console.log(
-      '🚀 ~ AuthService ~ register ~ verificationCode:',
-      verificationCode.code
-    )
     verificationCode.save()
 
     // Sending email
+
+    const verificationUrl = `${config.APP_ORIGIN}/confirm-account?code=${verificationCode.code}`
+    await sendEmail({
+      to: newUser.email,
+
+      ...verifyEmailTemplate(verificationUrl)
+    })
 
     return { user: newUser }
   }
