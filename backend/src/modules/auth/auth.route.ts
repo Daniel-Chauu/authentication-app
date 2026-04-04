@@ -9,6 +9,12 @@ authRoute.post('/login', authController.login)
 
 authRoute.get('/refresh-token', authController.refreshToken)
 
+authRoute.post('/password/forgot', authController.forgotPassword)
+
+authRoute.post('/password/reset', authController.resetPassword)
+
+authRoute.post('/logout', authController.logout)
+
 authRoute.post('/verify-email', authController.verifyEmail)
 
 export default authRoute

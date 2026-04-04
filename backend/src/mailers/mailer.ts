@@ -21,8 +21,7 @@ export const sendEmail = async ({
   to,
   from = mailer_sender
 }: Params) => {
-  console.log('SEND EMAIL')
-  await resend.emails.send({
+  return await resend.emails.send({
     from,
     to: Array.isArray(to) ? to : [to],
     text,
