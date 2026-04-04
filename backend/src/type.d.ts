@@ -1,12 +1,14 @@
+import { IUser } from './database/models/user.model'
 import { Request } from 'express'
-import { UserDocument } from './database/models/user.model'
 
 declare global {
   namespace Express {
-    type User = UserDocument
+    interface User extends IUser {
+      id: string
+    }
     interface Request {
       sessionId?: string
-      user?: UserDocument
+      user?: User
     }
   }
 }
