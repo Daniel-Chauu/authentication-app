@@ -33,7 +33,7 @@ import { sendEmail } from '~/mailers/mailer'
 import { verifyEmailTemplate } from '~/mailers/templates/template'
 
 export class AuthService {
-  private generateRefreshToken(payload: { sessionId: Types.ObjectId }) {
+  public generateRefreshToken(payload: { sessionId: Types.ObjectId }) {
     return signToken({
       payload,
       secretKey: config.JWT.REFRESH_SECRET,
@@ -44,7 +44,7 @@ export class AuthService {
       }
     })
   }
-  private generateAccessToken(payload: {
+  public generateAccessToken(payload: {
     userId: Types.ObjectId
     sessionId: Types.ObjectId
   }) {
@@ -121,7 +121,14 @@ export class AuthService {
       )
     }
 
-    // Check if the user enable 2fa return user = null
+    if (user.userPreferences.enable2FA) {
+      return {
+        user: null,
+        mfaRequired: true,
+        accessToken: '',
+        refreshToken: ''
+      }
+    }
 
     const userId = user._id
     const session = await SessionModel.create({

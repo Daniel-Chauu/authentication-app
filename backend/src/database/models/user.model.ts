@@ -7,7 +7,7 @@ interface UserPreferences {
   twoFactorSecret?: string
 }
 
-export interface IUser {
+export interface UserDocument extends Document {
   name: string
   email: string
   password: string
@@ -18,8 +18,6 @@ export interface IUser {
   userPreferences: UserPreferences
   comparePassword(value: string): Promise<boolean>
 }
-
-export interface UserDocument extends IUser, Document {}
 
 const userPreferencesSchema = new Schema<UserPreferences>({
   enable2FA: { type: Boolean, default: false },
